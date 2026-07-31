@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %} - Accueil{% endblock %}
+{% block content %}
+<div class="p-5 mb-4 bg-white rounded-4 shadow-sm">
+  <div class="container-fluid py-3">
+    <h1 class="display-6 fw-bold">OSC Shop</h1>
+    <p class="col-md-8 fs-5 text-secondary">Une application e-commerce de démonstration pour tester la sécurité, les logs et les réactions d’une chaîne proxy/WAF.</p>
+    <a class="btn btn-primary btn-lg" href="{{ url_for('catalog.list_products') }}">Explorer le catalogue</a>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-md-4"><div class="card h-100"><div class="card-body"><h5><i class="bi bi-bag"></i> Catalogue</h5><p>Produits fictifs et recherche.</p></div></div></div>
+  <div class="col-md-4"><div class="card h-100"><div class="card-body"><h5><i class="bi bi-graph-up"></i> Logs</h5><p>Événements structurés pour Wazuh.</p></div></div></div>
+  <div class="col-md-4"><div class="card h-100"><div class="card-body"><h5><i class="bi bi-shield-check"></i> Demo Mode</h5><p>Scénarios vulnérables activables à la demande.</p></div></div></div>
+</div>
+{% endblock %}

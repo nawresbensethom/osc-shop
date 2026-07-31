@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block title %} - {{ product.name }}{% endblock %}
+{% block content %}
+<div class="row g-4">
+  <div class="col-lg-6">
+    <img src="{{ product.image_url }}" class="img-fluid rounded-4 shadow-sm" alt="{{ product.name }}">
+  </div>
+  <div class="col-lg-6">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h1 class="h3">{{ product.name }}</h1>
+        <p class="text-secondary">{{ product.short_description }}</p>
+        <p>{{ product.description }}</p>
+        <p><span class="badge bg-secondary">{{ product.category }}</span></p>
+        <p class="fs-4 fw-bold">{{ "%.2f"|format(product.price) }} €</p>
+
+        {% if current_user.is_authenticated %}
+        <form method="post" action="{{ url_for('cart.add', product_id=product.id) }}" class="row g-2 align-items-end">
+          {{ cart_form.hidden_tag() }}
+          <div class="col-4">
+            {{ cart_form.quantity.label(class="form-label") }}
+            {{ cart_form.quantity(class="form-control") }}
+          </div>
+          <div class="col-8">
+            <button class="btn btn-primary">Ajouter au panier</button>
+          </div>
+        </form>
+        {% else %}
+        <a class="btn btn-primary" href="{{ url_for('auth.login') }}">Connectez-vous pour commander</a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row mt-5">
+  <div class="col-lg-8">
+    <h2 class="h4 mb-3">Avis</h2>
+    {% for review in reviews %}
+      <div class="card mb-3">
+        <div class="card-body">
+          <div class="d-flex justify-content-between">
+            <strong>{{ review.title }}</strong>
+            <span class="badge bg-info text-dark">{{ review.rating }}/5</span>
+          </div>
+          <small class="text-muted">{{ review.user.username }}</small>
+          <p class="mt-2 mb-0">
+            {% if demo_xss %}
+              {{ review.body|safe }}
+            {% else %}
+              {{ review.body }}
+            {% endif %}
+          </p>
+        </div>
+      </div>
+    {% else %}
+      <div class="alert alert-light">Aucun avis pour le moment.</div>
+    {% endfor %}
+  </div>
+
+  <div class="col-lg-4">
+    {% if can_review %}
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h3 class="h5">Laisser un avis</h3>
+        <form method="post" action="{{ url_for('catalog.add_review', product_id=product.id) }}">
+          {{ form.hidden_tag() }}
+          <div class="mb-3">{{ form.rating.label(class="form-label") }}{{ form.rating(class="form-control") }}</div>
+          <div class="mb-3">{{ form.title.label(class="form-label") }}{{ form.title(class="form-control") }}</div>
+          <div class="mb-3">{{ form.body.label(class="form-label") }}{{ form.body(class="form-control", rows="4") }}</div>
+          <button class="btn btn-outline-primary">Publier</button>
+        </form>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

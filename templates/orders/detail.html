@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %} - Commande {{ order.order_number }}{% endblock %}
+{% block content %}
+<h2 class="h4 mb-3">Commande {{ order.order_number }}</h2>
+<div class="card shadow-sm">
+  <div class="card-body">
+    <p><strong>Client:</strong> {{ order.customer_name }} ({{ order.customer_email }})</p>
+    <p><strong>Statut:</strong> {{ order.status }}</p>
+    <p><strong>Total:</strong> {{ "%.2f"|format(order.total_amount) }} €</p>
+    <div class="table-responsive">
+      <table class="table">
+        <thead><tr><th>Produit</th><th>Qté</th><th>Total</th></tr></thead>
+        <tbody>
+        {% for item in order.items %}
+          <tr><td>{{ item.product_name }}</td><td>{{ item.quantity }}</td><td>{{ "%.2f"|format(item.line_total) }} €</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %} - Admin Avis{% endblock %}
+{% block content %}
+<h2 class="h4 mb-3">Avis</h2>
+<div class="card shadow-sm">
+  <div class="table-responsive">
+    <table class="table mb-0">
+      <thead><tr><th>Produit</th><th>Utilisateur</th><th>Note</th><th>Titre</th></tr></thead>
+      <tbody>
+        {% for review in reviews %}
+        <tr><td>{{ review.product.name }}</td><td>{{ review.user.username }}</td><td>{{ review.rating }}</td><td>{{ review.title }}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

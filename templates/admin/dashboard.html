@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %} - Admin{% endblock %}
+{% block content %}
+<h2 class="h4 mb-3">Tableau de bord administrateur</h2>
+<div class="row g-3">
+  {% for label, value in stats.items() %}
+  <div class="col-md-3"><div class="card shadow-sm"><div class="card-body text-center"><div class="text-muted text-uppercase small">{{ label }}</div><div class="fs-3 fw-bold">{{ value }}</div></div></div></div>
+  {% endfor %}
+</div>
+<div class="mt-4 d-flex flex-wrap gap-2">
+  <a class="btn btn-outline-primary" href="{{ url_for('admin.products') }}">Produits</a>
+  <a class="btn btn-outline-primary" href="{{ url_for('admin.users') }}">Utilisateurs</a>
+  <a class="btn btn-outline-primary" href="{{ url_for('admin.orders') }}">Commandes</a>
+  <a class="btn btn-outline-primary" href="{{ url_for('admin.reviews') }}">Avis</a>
+</div>
+{% endblock %}

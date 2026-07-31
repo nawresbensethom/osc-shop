@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %} - Admin Utilisateurs{% endblock %}
+{% block content %}
+<h2 class="h4 mb-3">Utilisateurs</h2>
+<div class="card shadow-sm">
+  <div class="table-responsive">
+    <table class="table mb-0">
+      <thead><tr><th>Nom</th><th>Email</th><th>Rôle</th><th>Créé</th></tr></thead>
+      <tbody>
+        {% for user in users %}
+        <tr><td>{{ user.username }}</td><td>{{ user.email }}</td><td>{{ user.role }}</td><td>{{ user.created_at }}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

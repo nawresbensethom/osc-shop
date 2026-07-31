@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %} - Admin Commandes{% endblock %}
+{% block content %}
+<h2 class="h4 mb-3">Commandes</h2>
+<div class="card shadow-sm">
+  <div class="table-responsive">
+    <table class="table mb-0">
+      <thead><tr><th>N°</th><th>Client</th><th>Statut</th><th>Total</th></tr></thead>
+      <tbody>
+        {% for order in orders %}
+        <tr><td>{{ order.order_number }}</td><td>{{ order.customer_name }}</td><td>{{ order.status }}</td><td>{{ "%.2f"|format(order.total_amount) }} €</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
