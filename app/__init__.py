@@ -4,7 +4,7 @@ import logging
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
 
-from flask import Flask, g, request
+from flask import Flask, g, request, render_template
 
 from config import get_config
 from extensions import csrf, db, login_manager
@@ -13,6 +13,20 @@ from routes import register_blueprints
 from services.seed_service import seed_demo_data
 from utils.logging import RequestLogFormatter
 from utils.security import add_security_headers
+
+DEMO_FLAGS = [
+    "ENABLE_SQLI",
+    "ENABLE_XSS",
+    "ENABLE_IDOR",
+    "ENABLE_UPLOAD",
+    "ENABLE_BRUTE_FORCE",
+    "ENABLE_DEBUG_ERRORS",
+    "ENABLE_ENUMERATION",
+    "ENABLE_RATE_LIMITING",
+    "ENABLE_CSRF",
+    "ENABLE_INSECURE_COOKIES",
+    "ENABLE_WEAK_HEADERS",
+]
 
 
 def _configure_logging(app: Flask) -> None:
@@ -31,6 +45,23 @@ def create_app(config_name: str | None = None) -> Flask:
     app = Flask(__name__, instance_relative_config=True, template_folder="../templates", static_folder="../static")
     app.config.from_object(get_config(config_name))
     app.config.from_prefixed_env()
+
+    try:
+        import demo_config as demo_module
+
+        for flag_name in DEMO_FLAGS:
+            app.config[flag_name] = bool(getattr(demo_module, flag_name, False))
+    except Exception:
+        for flag_name in DEMO_FLAGS:
+            app.config.setdefault(flag_name, False)
+
+    if app.config.get("ENABLE_INSECURE_COOKIES"):
+        app.config["SESSION_COOKIE_HTTPONLY"] = False
+        app.config["SESSION_COOKIE_SECURE"] = False
+        app.config["SESSION_COOKIE_SAMESITE"] = "None"
+        app.config["REMEMBER_COOKIE_HTTPONLY"] = False
+        app.config["REMEMBER_COOKIE_SECURE"] = False
+        app.config["REMEMBER_COOKIE_SAMESITE"] = "None"
 
     Path(app.instance_path).mkdir(parents=True, exist_ok=True)
     _configure_logging(app)
@@ -68,12 +99,16 @@ def create_app(config_name: str | None = None) -> Flask:
 
     @app.errorhandler(404)
     def not_found(_error: Exception):  # noqa: ANN401
-        return app.jinja_env.get_template("errors/404.html").render(), 404
+        return render_template("errors/404.html"), 404
 
     @app.errorhandler(500)
     def server_error(error: Exception):  # noqa: ANN401
         app.logger.exception("Server error", extra={"client_ip": getattr(g, "client_ip", "unknown"), "user_agent": getattr(g, "user_agent", "unknown")})
-        return app.jinja_env.get_template("errors/500.html").render(), 500
+        return render_template("errors/500.html"), 500
+
+    @app.errorhandler(429)
+    def too_many_requests(_error: Exception):  # noqa: ANN401
+        return render_template("errors/429.html"), 429
 
     with app.app_context():
         db.create_all()

@@ -2,13 +2,11 @@ from __future__ import annotations
 
 from flask import Flask
 
-from demo_config import ENABLE_WEAK_HEADERS
-
 
 def add_security_headers(app: Flask) -> None:
     @app.after_request
     def _apply_headers(response):  # noqa: ANN001
-        if ENABLE_WEAK_HEADERS:
+        if app.config.get("ENABLE_WEAK_HEADERS", False):
             response.headers["X-Powered-By"] = "OSC Shop Demo"
         else:
             response.headers["X-Content-Type-Options"] = "nosniff"

@@ -9,7 +9,9 @@ from extensions import db
 from forms.auth import LoginForm, ProfileForm, RegisterForm
 from models import User
 from services.auth_backend import get_auth_backend
+from services.demo_service import demo_flag
 from utils.logging import log_event
+from utils.rate_limit import check_rate_limit
 
 auth_bp = Blueprint("auth", __name__, url_prefix="/auth")
 
@@ -20,6 +22,16 @@ def register():
         return redirect(url_for("main.index"))
     form = RegisterForm()
     if form.validate_on_submit():
+        existing_user = User.query.filter((User.username == form.username.data) | (User.email == form.email.data)).first()
+        if existing_user:
+            if demo_flag("ENABLE_ENUMERATION"):
+                if existing_user.username == form.username.data:
+                    form.username.errors.append("Ce nom d'utilisateur est déjà utilisé.")
+                if existing_user.email == form.email.data:
+                    form.email.errors.append("Cet email est déjà utilisé.")
+            else:
+                flash("Impossible de créer le compte avec ces informations.", "danger")
+            return render_template("auth/register.html", form=form)
         user = User(
             username=form.username.data,
             email=form.email.data,
@@ -41,6 +53,17 @@ def login():
         return redirect(url_for("main.index"))
     form = LoginForm()
     if form.validate_on_submit():
+        client_ip = getattr(request, "remote_addr", "unknown") or "unknown"
+        if not demo_flag("ENABLE_BRUTE_FORCE"):
+            limit_result = check_rate_limit(
+                f"login:{client_ip}",
+                limit=5 if not demo_flag("ENABLE_RATE_LIMITING") else 3,
+                window_seconds=60,
+            )
+            if not limit_result.allowed:
+                log_event(current_app.logger, "login_rate_limited")
+                flash("Trop de tentatives. Réessayez plus tard.", "warning")
+                return render_template("auth/login.html", form=form), 429
         backend = get_auth_backend()
         user = backend.authenticate(form.username.data, form.password.data)
         if user:
@@ -51,7 +74,14 @@ def login():
             next_url = request.args.get("next") or url_for("main.index")
             return redirect(next_url)
         log_event(current_app.logger, "login_failed")
-        flash("Identifiants invalides.", "danger")
+        if demo_flag("ENABLE_ENUMERATION"):
+            known_user = User.query.filter((User.username == form.username.data) | (User.email == form.username.data)).first()
+            if known_user:
+                flash("Le mot de passe est incorrect.", "danger")
+            else:
+                flash("Ce compte n'existe pas.", "danger")
+        else:
+            flash("Identifiants invalides.", "danger")
     return render_template("auth/login.html", form=form)
 
 

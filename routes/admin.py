@@ -5,7 +5,7 @@ from flask_login import current_user, login_required
 
 from extensions import db
 from forms.product import ProductForm
-from models import Order, Product, Review, User
+from models import ContactMessage, Order, Product, Review, User
 from utils.decorators import admin_required
 from utils.logging import log_event
 
@@ -21,6 +21,7 @@ def dashboard():
         "products": Product.query.count(),
         "orders": Order.query.count(),
         "reviews": Review.query.count(),
+        "messages": ContactMessage.query.count(),
     }
     return render_template("admin/dashboard.html", stats=stats)
 
@@ -102,3 +103,35 @@ def orders():
 @admin_required
 def reviews():
     return render_template("admin/reviews.html", reviews=Review.query.order_by(Review.created_at.desc()).all())
+
+
+@admin_bp.route("/messages")
+@login_required
+@admin_required
+def messages():
+    messages = ContactMessage.query.order_by(ContactMessage.created_at.desc()).all()
+    return render_template("admin/messages.html", messages=messages)
+
+
+@admin_bp.route("/messages/<int:message_id>")
+@login_required
+@admin_required
+def message_detail(message_id: int):
+    message = db.session.get(ContactMessage, message_id)
+    if not message:
+        abort(404)
+    return render_template("admin/message_detail.html", message=message)
+
+
+@admin_bp.route("/messages/<int:message_id>/read", methods=["POST"])
+@login_required
+@admin_required
+def message_mark_read(message_id: int):
+    message = db.session.get(ContactMessage, message_id)
+    if not message:
+        abort(404)
+    message.is_read = True
+    message.status = "read"
+    db.session.commit()
+    flash("Message marqué comme lu.", "success")
+    return redirect(url_for("admin.messages"))

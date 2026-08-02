@@ -25,6 +25,7 @@
           <li class="nav-item"><a class="nav-link" href="{{ url_for('auth.profile') }}">Profil</a></li>
           {% if current_user.is_admin %}
             <li class="nav-item"><a class="nav-link" href="{{ url_for('admin.dashboard') }}">Admin</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('demo.index') }}">Démo</a></li>
           {% endif %}
         {% endif %}
       </ul>

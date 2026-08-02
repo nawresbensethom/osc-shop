@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from flask import Blueprint, abort, render_template, request, current_app
 from flask_login import current_user, login_required
+from sqlalchemy import text
 
 from extensions import db
 from forms.cart import CartAddForm
@@ -18,10 +19,13 @@ def list_products():
     query = request.args.get("q", "").strip()
     if query:
         log_event(current_app.logger, f"search:{query}")
-    products = Product.query.filter_by(is_active=True)
+    products_query = Product.query.filter_by(is_active=True)
     if query:
-        products = products.filter(Product.name.ilike(f"%{query}%"))
-    products = products.order_by(Product.created_at.desc()).all()
+        if demo_flag("ENABLE_SQLI"):
+            products_query = Product.query.filter(text(f"is_active = 1 AND name LIKE '%{query}%'"))
+        else:
+            products_query = products_query.filter(Product.name.ilike(f"%{query}%"))
+    products = products_query.order_by(Product.created_at.desc()).all()
     return render_template("catalog/list.html", products=products, query=query)
 
 
