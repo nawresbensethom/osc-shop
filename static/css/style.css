@@ -1,0 +1,4 @@
+body { min-height: 100vh; display: flex; flex-direction: column; }
+main { flex: 1; }
+.product-image { height: 240px; object-fit: cover; }
+.card { border: 0; }

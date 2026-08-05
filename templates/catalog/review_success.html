@@ -1,0 +1,5 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="alert alert-success">Votre avis a été enregistré pour {{ product.name }}.</div>
+<a class="btn btn-primary" href="{{ url_for('catalog.product_detail', product_id=product.id) }}">Retour au produit</a>
+{% endblock %}

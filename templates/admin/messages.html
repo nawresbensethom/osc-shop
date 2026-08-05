@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %} - Admin Messages{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div>
+    <h2 class="h4 mb-1">Messages de contact</h2>
+    <p class="text-muted mb-0">Consulte et traite les messages reçus via le formulaire de contact.</p>
+  </div>
+  <a class="btn btn-outline-secondary" href="{{ url_for('admin.dashboard') }}">Retour dashboard</a>
+</div>
+<div class="card shadow-sm">
+  <div class="table-responsive">
+    <table class="table mb-0 align-middle">
+      <thead><tr><th>Nom</th><th>Email</th><th>Sujet</th><th>Statut</th><th>Date</th><th></th></tr></thead>
+      <tbody>
+        {% for message in messages %}
+        <tr>
+          <td>{{ message.name }}</td>
+          <td>{{ message.email }}</td>
+          <td>{{ message.subject }}</td>
+          <td><span class="badge bg-{{ 'success' if message.is_read else 'warning text-dark' }}">{{ 'Lu' if message.is_read else 'Nouveau' }}</span></td>
+          <td>{{ message.created_at }}</td>
+          <td class="text-end">
+            <a class="btn btn-sm btn-outline-primary" href="{{ url_for('admin.message_detail', message_id=message.id) }}">Voir</a>
+            {% if not message.is_read %}
+            <form method="post" action="{{ url_for('admin.message_mark_read', message_id=message.id) }}" class="d-inline">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button class="btn btn-sm btn-outline-success">Marquer lu</button>
+            </form>
+            {% endif %}
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="6" class="text-center text-muted py-4">Aucun message.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %} - Message{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h2 class="h4 mb-3">{{ message.subject }}</h2>
+        <p class="mb-1"><strong>Nom :</strong> {{ message.name }}</p>
+        <p class="mb-1"><strong>Email :</strong> {{ message.email }}</p>
+        <p class="mb-1"><strong>Statut :</strong> {{ message.status }}</p>
+        <p class="text-muted small">{{ message.created_at }}</p>
+        <hr>
+        <p>{{ message.message }}</p>
+        {% if not message.is_read %}
+        <form method="post" action="{{ url_for('admin.message_mark_read', message_id=message.id) }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button class="btn btn-success">Marquer comme lu</button>
+        </form>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

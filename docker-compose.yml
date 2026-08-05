@@ -1,0 +1,22 @@
+services:
+  web:
+    build: .
+    container_name: osc-shop-web
+    env_file:
+      - .env
+    ports:
+      - "5000:5000"
+    environment:
+      OIDC_ENABLED: "true"
+      KEYCLOAK_METADATA_URL: ${KEYCLOAK_METADATA_URL:-http://10.10.0.1:8080/realms/osc/.well-known/openid-configuration}
+      KEYCLOAK_CLIENT_ID: ${KEYCLOAK_CLIENT_ID:-my-custom-app}
+      KEYCLOAK_CLIENT_SECRET: ${KEYCLOAK_CLIENT_SECRET:-}
+      KEYCLOAK_REDIRECT_URI: ${KEYCLOAK_REDIRECT_URI:-http://10.10.0.1:5000/callback}
+      KEYCLOAK_REQUIRED_GROUPS: ${KEYCLOAK_REQUIRED_GROUPS:-app-users}
+    volumes:
+      - .:/app
+      - osc_shop_instance:/app/instance
+    restart: unless-stopped
+
+volumes:
+  osc_shop_instance:
